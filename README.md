@@ -3,7 +3,7 @@
 The astrun package is to provide a "relative" secure way to evaluate Python expressions similar to Python's `eval`,
 as the builtin `eval` and `exec` are insecure and can be exploited in many ways.
 
-This project is too small to be made a PyPI package. Just copy, modify and use. Happy Programming.
+This package is very small and need no dependencies. You can just copy, modify and use. Happy Programming.
 
 # Use Cases
 
