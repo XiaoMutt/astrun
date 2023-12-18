@@ -11,11 +11,11 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="astrun",
-    version="1.0.0",
+    version="1.0.1",
     description="A ",
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://github.com/XiaoMutt/palpable",
+    url="https://github.com/XiaoMutt/astrun",
     author="Xiao",
     license="MIT",
     classifiers=[
