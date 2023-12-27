@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from astrun import Astrun
-from isolated_env import IsolatedEnv
+from astrun import IsolatedEnv
 
 
 class ExecIsolatedEnv(IsolatedEnv):

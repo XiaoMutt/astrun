@@ -14,7 +14,9 @@ This package is very small and need no dependencies. You can just copy, modify a
 
 # Examples
 
-```
+```Python
+from astrun import Astrun
+
 Astrun.eval("1 in {i for i in range(10) if i % 2 == 1}") # return True
 
 Astrun.eval("__import__('os')") # will through PermissionError
@@ -57,8 +59,10 @@ separated constraint Python Process:
 
 E.g.
 
-```
-class AstrunIsolatedEnv(IsolatedEnv)
+```Python
+from astrun import Astrun, IsolatedEnv
+
+class AstrunIsolatedEnv(IsolatedEnv):
     @staticmethod
     def _run(args):
         return Astrun.eval(args)
