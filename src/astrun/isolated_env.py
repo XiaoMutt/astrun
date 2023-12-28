@@ -1,7 +1,9 @@
 import resource
+import sys
+import warnings
 from multiprocessing import Process, Queue
 from queue import Empty
-from typing import Callable, Any
+from typing import Callable
 
 
 def _run_virtual_environment_(run, input_queue: Queue, output_queue: Queue, MAX_MEMORY, MAX_CPU_TIME):
@@ -12,7 +14,10 @@ def _run_virtual_environment_(run, input_queue: Queue, output_queue: Queue, MAX_
 
     ###########################
     # restrict total memory
-    resource.setrlimit(resource.RLIMIT_AS, (MAX_MEMORY, MAX_MEMORY))
+    if sys.platform == "linux":
+        resource.setrlimit(resource.RLIMIT_AS, (MAX_MEMORY, MAX_MEMORY))
+    else:
+        warnings.warn(f"Unsupported system: {sys.platform}.")
 
     ############################
     # restrict total cpu time
@@ -26,7 +31,10 @@ def _run_virtual_environment_(run, input_queue: Queue, output_queue: Queue, MAX_
 
     while True:
         try:
-            args, kwargs = input_queue.get()
+            params = input_queue.get()
+            if params is None:
+                break
+            args, kwargs = params
             output_queue.put(run(*args, **kwargs))
         except Exception as err:
             output_queue.put(err)
@@ -55,7 +63,8 @@ class IsolatedEnv:
         self.output_queue = Queue()
         run = self._run if function is ... else function
         self.process = Process(target=_run_virtual_environment_,
-                               args=(run, self.input_queue, self.output_queue, MAX_MEMORY, MAX_CPU_TIME))
+                               args=(run, self.input_queue, self.output_queue, MAX_MEMORY, MAX_CPU_TIME),
+                               daemon=True)  # set as a daemon Process, so no subprocess is allowed.
         self.process.start()
         self.RESULT_WAITING_TIME = RESULT_WAITING_TIME
 
@@ -83,7 +92,10 @@ class IsolatedEnv:
             raise TimeoutError("The worker did not return results on time and is terminated.")
 
     def close(self):
-        self.process.terminate()
+        self.input_queue.put(None)
+        self.process.join(1)
+        if self.process.is_alive():
+            self.process.terminate()
 
     def __enter__(self):
         return self
