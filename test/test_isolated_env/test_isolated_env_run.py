@@ -6,17 +6,21 @@ from astrun import IsolatedEnv
 
 class ExecIsolatedEnv(IsolatedEnv):
     @staticmethod
-    def _run(args):
-        exec(args)
+    def _run(*args):
+        exec(*args)
 
 
 class AstrunIsolatedEnv(IsolatedEnv):
     @staticmethod
-    def _run(args):
-        return Astrun.eval(args)
+    def _run(*args):
+        return Astrun.eval(*args)
 
 
 class TestIsolatedEnv(TestCase):
+    def test_fun_as_param(self):
+        with IsolatedEnv(Astrun.eval) as env:
+            self.assertEqual(env("max(0,1)"), 1)
+
     def test_memory(self):
         with ExecIsolatedEnv() as env:
             with self.assertRaises(TimeoutError):
@@ -48,10 +52,9 @@ class TestIsolatedEnv(TestCase):
                 env("""import os;assert os.system("ls")==0""")
 
     def test_command(self):
-        import os
-        print(os.getcwd())
         with ExecIsolatedEnv() as env:
-            env("""import os;os.removedirs("tmp")""")
+            with self.assertRaises(OSError):
+                env("""import os;os.getcwd()""")
 
     def test_astrun(self):
         with AstrunIsolatedEnv() as env:

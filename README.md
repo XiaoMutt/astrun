@@ -14,13 +14,13 @@ This package is very small and need no dependencies. You can just copy, modify a
 
 # Examples
 
-```Python
+```python
 from astrun import Astrun
 
-Astrun.eval("1 in {i for i in range(10) if i % 2 == 1}") # return True
+Astrun.eval("1 in {i for i in range(10) if i % 2 == 1}")  # return True
 
-Astrun.eval("__import__('os')") # will through PermissionError
-Astrun.eval("open('file', 'w')") # will through PermissionError
+Astrun.eval("__import__('os')")  # will through PermissionError
+Astrun.eval("open('file', 'w')")  # will through PermissionError
 ```
 
 For more examples, see the test code in `test` and the source code in `src`.
@@ -59,16 +59,18 @@ separated constraint Python Process:
 
 E.g.
 
-```Python
+```python
 from astrun import Astrun, IsolatedEnv
+
 
 class AstrunIsolatedEnv(IsolatedEnv):
     @staticmethod
-    def _run(args):
-        return Astrun.eval(args)
+    def _run(*args):
+        return Astrun.eval(*args)
+
 
 with AstrunIsolatedEnv() as env:
-    assert env("1+1")==2
+    assert env("1+1") == 2
 ```
 
 # Safety Warnings
