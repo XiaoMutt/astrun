@@ -26,8 +26,8 @@ def _run_virtual_environment_(run, input_queue: Queue, output_queue: Queue, MAX_
 
     while True:
         try:
-            args = input_queue.get()
-            output_queue.put(run(args))
+            args, kwargs = input_queue.get()
+            output_queue.put(run(*args, **kwargs))
         except Exception as err:
             output_queue.put(err)
 
@@ -63,12 +63,12 @@ class IsolatedEnv:
     def _run(*args, **kwargs):
         raise NotImplemented
 
-    def __call__(self, args):
+    def __call__(self, *args, **kwargs):
         if not self.process.is_alive():
             raise RuntimeError(f"The worker process has been terminated.")
 
         try:
-            self.input_queue.put(args)  # blocking
+            self.input_queue.put((args, kwargs))  # blocking
             result = self.output_queue.get(timeout=self.RESULT_WAITING_TIME)  # blocking
             if isinstance(result, Exception):
                 raise result
