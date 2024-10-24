@@ -306,7 +306,11 @@ class Astrun(ast.NodeVisitor):
             return value[slice_param]
 
     def visit_Slice(self, node):
-        return slice(self.visit(node.lower), self.visit(node.upper), self.visit(node.step))
+        return slice(
+            None if node.lower is None else self.visit(node.lower),
+            None if node.upper is None else self.visit(node.upper),
+            None if node.step is None else self.visit(node.step)
+        )
 
     #######################
     # Comprehensions

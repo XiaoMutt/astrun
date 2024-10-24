@@ -19,8 +19,8 @@ from astrun import Astrun
 
 Astrun.eval("1 in {i for i in range(10) if i % 2 == 1}")  # return True
 
-Astrun.eval("__import__('os')")  # will through PermissionError
-Astrun.eval("open('file', 'w')")  # will through PermissionError
+Astrun.eval("__import__('os')")  # will throw PermissionError
+Astrun.eval("open('file', 'w')")  # will throw PermissionError
 ```
 
 For more examples, see the test code in `test` and the source code in `src`.
