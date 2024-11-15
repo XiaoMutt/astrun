@@ -37,6 +37,7 @@ Astrun.visit_Subscript to other ways of unpacking.
 - The tree is then executed by translating each node back to `Astrun`'s own Python code.
     - The execution is within a namespace that excludes the dangerous builtins functions such as
       `eval`, `exec`,`globals`, `__import__`, etc.
+      - see the Astrun's namespace attribute. Common built-ins are included and the "re" package is included.
     - Advanced AST nodes, such as function and class definition, are blocked.
     - Private or dunder attributes' access of any object is prohibited.
 

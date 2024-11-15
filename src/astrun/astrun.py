@@ -1,4 +1,5 @@
 import ast
+import re
 from typing import Any
 
 
@@ -32,6 +33,7 @@ class Astrun(ast.NodeVisitor):
                 "next": next,
                 "pow": pow,
                 "range": range,
+                "re": re,
                 "reversed": reversed,
                 "round": round,
                 "set": set,
@@ -67,6 +69,8 @@ class Astrun(ast.NodeVisitor):
 
     # no string formatting, no f-strings
 
+    ###########################
+    # build in data structures
     def visit_List(self, node):
         if isinstance(node.ctx, ast.Load):
             res = []
@@ -131,6 +135,8 @@ class Astrun(ast.NodeVisitor):
         else:
             raise PermissionError
 
+    ##################
+    # star operator
     def visit_Starred(self, node):
         if isinstance(node.ctx, ast.Load):
             for item in self.visit(node.value):
@@ -145,8 +151,11 @@ class Astrun(ast.NodeVisitor):
     def visit_Expr(self, node):
         return self.visit(node.value)
 
+    ###################
+    # Unary Operators
     def visit_UnaryOp(self, node):
-        return self.visit(node.op)(self.visit(node.operand))
+        value = self.visit(node.operand)  # directly evaluate operand
+        return self.visit(node.op)(value)
 
     def visit_UAdd(self, node):
         return lambda a: +a
@@ -160,8 +169,13 @@ class Astrun(ast.NodeVisitor):
     def visit_Invert(self, node):
         return lambda a: ~a
 
+    ###########################
+    # Binary operations
     def visit_BinOp(self, node):
-        return self.visit(node.op)(self.visit(node.left), self.visit(node.right))
+        # directly evaluate operands
+        a = self.visit(node.left)
+        b = self.visit(node.right)
+        return self.visit(node.op)(a, b)
 
     def visit_Add(self, node):
         return lambda a, b: a + b
@@ -202,18 +216,26 @@ class Astrun(ast.NodeVisitor):
     def visit_MatMult(self, node):
         return lambda a, b: a @ b
 
+    ##################################
+    # boolean binary operations
+    # ATTENTION: need to delay the evaluation of the non-1st operand,
+    # since the 1st operand may give the result directly. E.g.
+    #  - True or None._raise_exception(): the exception will never throw
+    #  - False and None._raise_exception(): the exception will never throw
     def visit_BoolOp(self, node):
         res = self.visit(node.values[0])
         for value in node.values[1:]:
-            res = self.visit(node.op)(res, self.visit(value))
+            res = self.visit(node.op)(res, value)
         return res
 
     def visit_And(self, node):
-        return lambda a, b: a and b
+        return lambda a, b: a and self.visit(b)
 
     def visit_Or(self, node):
-        return lambda a, b: a or b
+        return lambda a, b: a or self.visit(b)
 
+    #########################
+    # compare operations
     def visit_Compare(self, node):
         res = self.visit(node.left)
         for op, cp in zip(node.ops, node.comparators):

@@ -48,3 +48,16 @@ class TestAstrunEval(TestCase):
             (r"c:\path\filename.h", {'Name': 'filename_digits-343-WHATEVER'}))
         with self.assertRaises(Exception):
             Astrun.eval("""lambda: 1""")(2)
+
+    def test_logic(self):
+        self.assertEqual(Astrun.eval("""lambda v: 1 or v[1]""")(None), 1)
+        self.assertEqual(Astrun.eval("""lambda v: 0 and v[1]""")(None), 0)
+
+    def test_re(self):
+        self.assertEqual(Astrun.eval(
+            """lambda path: (m:=path and re.match(r'^[^/]+/([^/]+)\\.txt$', path)) and m.group(1)""")("abc/target.txt"),
+                         "target")
+
+        self.assertEqual(Astrun.eval(
+            """lambda path: (m:=path and re.match(r'^[^/]+/([^/]+)\\.txt$', path)) and m.group(1)""")("abc/target.exe"),
+                         None)
